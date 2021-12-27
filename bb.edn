@@ -1,0 +1,2 @@
+{:babashka/tools {http-server {:entry-point babashka.http-server/-main}}
+ :deps {current/deps {:local/root "."}}}
