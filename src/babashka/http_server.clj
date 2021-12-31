@@ -1,41 +1,19 @@
 #!/usr/bin/env bb
-#_" -*- mode: clojure; -*-"
-;; Source: https://gist.github.com/holyjak/36c6284c047ffb7573e8a34399de27d8
-
+;; Based on https://gist.github.com/holyjak/36c6284c047ffb7573e8a34399de27d8
 ;; Based on https://github.com/babashka/babashka/blob/master/examples/image_viewer.clj
 (ns babashka.http-server
   (:require [babashka.fs :as fs]
-            [clojure.java.browse :as browse]
             [clojure.string :as str]
             [clojure.tools.cli :refer [parse-opts]]
             [hiccup2.core :as html]
             [org.httpkit.server :as server])
   (:import [java.net URLDecoder URLEncoder]))
 
-(def cli-options [["-p" "--port PORT" "Port for HTTP server" :default 8090 :parse-fn #(Integer/parseInt %)]
-                  ["-d" "--dir DIR" "Directory to serve files from" :default "."]
+(def cli-options [["-p" "--port PORT" "Port for HTTP server"
+                   :default 8090 :parse-fn #(Integer/parseInt %)]
+                  ["-d" "--dir DIR" "Directory to serve files from"
+                   :default "."]
                   ["-h" "--help" "Print usage info"]])
-
-(def parsed-args (parse-opts *command-line-args* cli-options))
-(def opts (:options parsed-args))
-
-(cond
-  (:help opts)
-  (do (println "Start a http server for static files in the given dir. Usage:\n" (:summary parsed-args))
-      (System/exit 0))
-
-  (:errors parsed-args)
-  (do (println "Invalid arguments:\n" (str/join "\n" (:errors parsed-args)))
-      (System/exit 1))
-
-  :else
-  :continue)
-
-
-(def port (:port opts))
-(def dir (fs/path (:dir opts)))
-
-(assert (fs/directory? dir) (str "The given dir `" dir "` is not a directory."))
 
 ;; A simple mime type utility from https://github.com/ring-clojure/ring/blob/master/ring-core/src/ring/util/mime_type.clj
 (def ^{:doc "A map of file extensions to mime-types."}
@@ -137,7 +115,7 @@
 (defn- filename-ext
   "Returns the file extension of a filename or filepath."
   [filename]
-  (if-let [ext (second (re-find #"\.([^./\\]+)$" filename))]
+  (when-let [ext (second (re-find #"\.([^./\\]+)$" filename))]
     (str/lower-case ext)))
 
 ;; https://github.com/ring-clojure/ring/blob/master/ring-core/src/ring/util/mime_type.clj
@@ -150,7 +128,7 @@
    (let [mime-types (merge default-mime-types mime-types)]
      (mime-types (filename-ext filename)))))
 
-(defn index [f]
+(defn index [dir f]
   (let [files (map #(str (.relativize dir %))
                    (fs/list-dir f))]
     {:body (-> [:html
@@ -172,24 +150,42 @@
   {:headers {"Content-Type" (ext-mime-type (fs/file-name path))}
    :body (fs/file path)})
 
-(defn -main [& _]
-  (server/run-server
-   (fn [{:keys [:uri]}]
-     (let [f (fs/path dir (str/replace-first (URLDecoder/decode uri) #"^/" ""))
-           index-file (fs/path f "index.html")]
-       (cond
-         (and (fs/directory? f) (fs/readable? index-file))
-         (body index-file)
+(defn serve [opts]
+  (let [dir (or (:dir opts) ".")
+        opts (assoc opts :dir dir)
+        dir (fs/path dir)]
+    (assert (fs/directory? dir) (str "The given dir `" dir "` is not a directory."))
+    (server/run-server
+     (fn [{:keys [:uri]}]
+       (let [f (fs/path dir (str/replace-first (URLDecoder/decode uri) #"^/" ""))
+             index-file (fs/path f "index.html")]
+         (cond
+           (and (fs/directory? f) (fs/readable? index-file))
+           (body index-file)
 
-         (fs/directory? f)
-         (index f)
+           (fs/directory? f)
+           (index dir f)
 
-         (fs/readable? f)
-         (body f)
+           (fs/readable? f)
+           (body f)
 
-         :else
-         {:status 404 :body (str "Not found `" f "` in " dir)})))
-   {:port port})
+           :else
+           {:status 404 :body (str "Not found `" f "` in " dir)})))
+     opts)))
 
-  (println "Starting http server at " port "for" (str dir))
-  @(promise))
+(defn -main [& args]
+  (let [parsed-args (parse-opts args cli-options)
+        opts (:options parsed-args)]
+    (cond
+      (:help opts)
+      (do (println "Start a http server for static files in the given dir. Usage:\n" (:summary parsed-args))
+          (System/exit 0))
+
+      (:errors parsed-args)
+      (do (println "Invalid arguments:\n" (str/join "\n" (:errors parsed-args)))
+          (System/exit 1))
+      :else
+      :continue)
+    (serve opts)
+    (println "Starting http server at" (:port opts) "for" (:dir opts))
+    @(promise)))
