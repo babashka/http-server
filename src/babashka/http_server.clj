@@ -9,11 +9,12 @@
             [org.httpkit.server :as server])
   (:import [java.net URLDecoder URLEncoder]))
 
-(def cli-options [["-p" "--port PORT" "Port for HTTP server"
-                   :default 8090 :parse-fn #(Integer/parseInt %)]
-                  ["-d" "--dir DIR" "Directory to serve files from"
-                   :default "."]
-                  ["-h" "--help" "Print usage info"]])
+(def ^:private
+  cli-options [["-p" "--port PORT" "Port for HTTP server"
+                :default 8090 :parse-fn #(Integer/parseInt %)]
+               ["-d" "--dir DIR" "Directory to serve files from"
+                :default "."]
+               ["-h" "--help" "Print usage info"]])
 
 ;; A simple mime type utility from https://github.com/ring-clojure/ring/blob/master/ring-core/src/ring/util/mime_type.clj
 (def ^{:doc "A map of file extensions to mime-types."}
@@ -119,7 +120,7 @@
     (str/lower-case ext)))
 
 ;; https://github.com/ring-clojure/ring/blob/master/ring-core/src/ring/util/mime_type.clj
-(defn ext-mime-type
+(defn- ext-mime-type
   "Get the mimetype from the filename extension. Takes an optional map of
   extensions to mimetypes that overrides values in the default-mime-types map."
   ([filename]
@@ -128,7 +129,7 @@
    (let [mime-types (merge default-mime-types mime-types)]
      (mime-types (filename-ext filename)))))
 
-(defn index [dir f]
+(defn- index [dir f]
   (let [files (map #(str (.relativize dir %))
                    (fs/list-dir f))]
     {:body (-> [:html
@@ -146,11 +147,16 @@
                html/html
                str)}))
 
-(defn body [path]
+(defn- body [path]
   {:headers {"Content-Type" (ext-mime-type (fs/file-name path))}
    :body (fs/file path)})
 
-(defn serve [opts]
+(defn serve
+  "Serves static assets using web server.
+  Options:
+  * :dir - directory from which to serve assets
+  * :port - port "
+  [opts]
   (let [dir (or (:dir opts) ".")
         opts (assoc opts :dir dir)
         dir (fs/path dir)]
@@ -173,7 +179,7 @@
            {:status 404 :body (str "Not found `" f "` in " dir)})))
      opts)))
 
-(defn -main [& args]
+(defn ^:no-doc -main [& args]
   (let [parsed-args (parse-opts args cli-options)
         opts (:options parsed-args)]
     (cond

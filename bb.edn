@@ -1,2 +1,12 @@
-{:babashka/tools {http-server {:entry-point babashka.http-server/-main}}
- :deps {current/deps {:local/root "."}}}
+{:pods {clj-kondo/clj-kondo {:version "2022.05.31"}}
+ :deps {io.github.borkdude/quickdoc
+        #_{:local/root "/Users/borkdude/dev/quickdoc"}
+        {:git/sha "d5313344c97b79f014a90634313b5fd2205938af"}
+        current/deps {:local/root "."}}
+ :tasks
+ {quickdoc {:doc "Invoke quickdoc"
+            :requires ([quickdoc.api :as api])
+            :task (let [{:keys [markdown]}
+                        (api/quickdoc {:toc true
+                                       :git/branch "main"
+                                       :github/repo "https://github.com/babashka/http-server"})])}}}
