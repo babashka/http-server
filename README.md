@@ -6,8 +6,6 @@ Serve static assets.
 
 Works in [clojure JVM](#clojure) and [babashka](#babashka).
 
-This README assumes you will update `:git/sha` to the latest sha of this repo.
-
 ## [API](API.md)
 
 ## Clojure
