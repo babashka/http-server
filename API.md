@@ -1,6 +1,5 @@
 # Table of contents
 -  [`babashka.http-server`](#babashkahttp-server) 
-    -  [`cli-opts`](#cli-opts)
     -  [`default-mime-types`](#default-mime-types) - A map of file extensions to mime-types.
     -  [`exec`](#exec) - Exec function, intended for command line usage
     -  [`serve`](#serve) - Serves static assets using web server.
@@ -10,8 +9,6 @@
 
 
 
-## `cli-opts`
-<sub>[source](https://github.com/babashka/http-server/blob/main/src/babashka/http_server.clj#L188-L188)</sub>
 ## `default-mime-types`
 
 A map of file extensions to mime-types.

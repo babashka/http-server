@@ -185,7 +185,7 @@ Options:
            {:status 404 :body (str "Not found `" f "` in " dir)})))
      opts)))
 
-(def cli-opts {:coerce {:port :long}})
+(def ^:private cli-opts {:coerce {:port :long}})
 
 (defn exec
   "Exec function, intended for command line usage. Same API as `serve` but
