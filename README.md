@@ -14,7 +14,7 @@ This README assumes you will update `:git/sha` to the latest sha of this repo.
 
 To your `deps.edn` add an alias:
 
-```
+``` clojure
 :serve {:deps {org.babashka/http-server {:mvn/version "0.1.3"}}
         :main-opts ["-m" "babashka.http-server"]
         :exec-fn babashka.http-server/exec}
@@ -22,19 +22,19 @@ To your `deps.edn` add an alias:
 
 Then run from the command line:
 
-```
+``` clojure
 clj -M:serve :port 1339 :dir "."
 ```
 
 or:
 
-```
+``` clojure
 clj -X:serve :port 1339 :dir '"."'
 ```
 
 Or install as a tool:
 
-```
+``` clojure
 $ clj -Ttools install io.github.babashka/http-server '{:git/tag "v0.1.3"}' :as serve
 $ clj -Tserve serve
 ```
@@ -43,7 +43,7 @@ $ clj -Tserve serve
 
 In a script, e.g. `/usr/local/bin/http-server`:
 
-```
+``` clojure
 #!/usr/bin/env bb
 
 (require '[babashka.deps :as deps])
@@ -57,7 +57,7 @@ In a script, e.g. `/usr/local/bin/http-server`:
 
 Then invoke using:
 
-```
+``` clojure
 $ http-server --port 8888 --dir resources/public
 ```
 
