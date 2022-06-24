@@ -1,6 +1,8 @@
 # http-server
 
-A tool to serve static assets during development.
+[![Clojars Project](https://img.shields.io/clojars/v/org.babashka/http-server.svg)](https://clojars.org/org.babashka/http-server)
+
+Serve static assets.
 
 Works in babashka and clojure JVM.
 
