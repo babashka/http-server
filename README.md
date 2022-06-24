@@ -10,6 +10,35 @@ This README assumes you will update `:git/sha` to the latest sha of this repo.
 
 ## [API](API.md)
 
+## Clojure
+
+To your `deps.edn` add an alias:
+
+```
+:serve {:deps {org.babashka/http-server {:mvn/version "0.1.3"}}
+        :main-opts ["-m" "babashka.http-server"]
+        :exec-fn babashka.http-server/exec}
+```
+
+Then run from the command line:
+
+```
+clj -M:serve :port 1339 :dir "."
+```
+
+or:
+
+```
+clj -X:serve :port 1339 :dir '"."'
+```
+
+Or install as a tool:
+
+```
+$ clj -Ttools install io.github.babashka/http-server '{:git/tag "v0.1.3"}' :as serve
+$ clj -Tserve serve
+```
+
 ## Babashka
 
 In a script, e.g. `/usr/local/bin/http-server`:
@@ -60,5 +89,8 @@ Serving assets at http://localhost:1338
 {:port 1338}
 ```
 
-## Clojure
+## License
 
+Copyright © 2022 Michiel Borkent
+
+Distributed under the MIT License. See LICENSE.
