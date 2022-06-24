@@ -34,7 +34,7 @@ Or install as a tool:
 
 ``` clojure
 $ clj -Ttools install io.github.babashka/http-server '{:git/tag "v0.1.3"}' :as serve
-$ clj -Tserve serve
+$ clj -Tserve exec
 ```
 
 ## Babashka
