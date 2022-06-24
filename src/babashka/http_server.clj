@@ -154,7 +154,7 @@
 
 (defn serve
   "Serves static assets using web server.
-  Options:
+Options:
   * `:dir` - directory from which to serve assets
   * `:port` - port"
   [{:keys [port]
@@ -192,8 +192,10 @@
   blocks until process receives SIGINT."
   {:org.babashka/cli cli-opts}
   [opts]
-  (serve opts)
-  @(promise))
+  (if (:help opts)
+    (println (:doc (meta #'serve)))
+    (do (serve opts)
+        @(promise))))
 
 (defn ^:no-doc -main [& args]
   (exec (cli/parse-opts args cli-opts)))
