@@ -1,7 +1,7 @@
 {:deps {org.babashka/cli {:mvn/version "0.2.23"}
         http-kit/http-kit {:mvn/version "2.6.0"}
         babashka/fs {:mvn/version "0.1.6"}
-        hiccup/hiccup {:mvn/version "1.0.5"}}
+        hiccup/hiccup {:mvn/version "2.0.0-alpha2"}}
  :tools/usage {:ns-default babashka.http-server}
  :aliases
  {:build ;; added by neil

@@ -5,15 +5,21 @@
         current/deps {:local/root "."}}
  :paths [".build"]
  :tasks
- {quickdoc {:doc "Invoke quickdoc"
+ {:requires ([clojure.edn :as edn]
+             [clojure.string :as str]
+             [babashka.cli :as cli]
+             [utils])
+  :init (def cmd-line-opts
+          (cli/parse-opts *command-line-args*
+                          {:coerce {:toc parse-boolean
+                                    :skip-bump parse-boolean}}))
+  quickdoc {:doc "Invoke quickdoc"
             :requires ([quickdoc.api :as api])
             :task (let [{:keys [markdown]}
                         (api/quickdoc {:toc true
                                        :git/branch "main"
                                        :github/repo "https://github.com/babashka/http-server"})])}
   bump-release {:doc "Bump release counter"
-                :requires ([utils]
-                           [clojure.string :as str])
                 :task (let [old-version (utils/format-version)]
                         (utils/bump-version)
                         (spit "README.md" (str/replace (slurp "README.md")
@@ -22,4 +28,10 @@
                         (shell "git add version.edn README.md")
                         (shell "git commit -m" (str "v" (utils/format-version)))
                         (shell "git tag" (str "v" (utils/format-version)))
-                        (shell "git push --tags"))}}}
+                        (shell "git push --tags"))}
+  
+  publish {:doc "Bump release count and publish to clojars"
+           :task (do
+                   (when-not (:skip-bump cmd-line-opts)
+                     (run 'bump-release))
+                   (clojure "-T:build deploy"))}}}
