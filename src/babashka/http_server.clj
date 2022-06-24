@@ -4,12 +4,13 @@
 (ns babashka.http-server
   (:require [babashka.fs :as fs]
             [clojure.string :as str]
-            [clojure.tools.cli :refer [parse-opts]]
+            #_[clojure.tools.cli :refer [parse-opts]]
             [hiccup2.core :as html]
+            [babashka.cli :as cli]
             [org.httpkit.server :as server])
   (:import [java.net URLDecoder URLEncoder]))
 
-(def ^:private
+#_(def ^:private
   cli-options [["-p" "--port PORT" "Port for HTTP server"
                 :default 8090 :parse-fn #(Integer/parseInt %)]
                ["-d" "--dir DIR" "Directory to serve files from"
@@ -154,15 +155,20 @@
 (defn serve
   "Serves static assets using web server.
   Options:
-  * :dir - directory from which to serve assets
-  * :port - port "
-  [opts]
+  * `:dir` - directory from which to serve assets
+  * `:port` - port"
+  [{:keys [port]
+    :or {port 8090}
+    :as opts}]
   (let [dir (or (:dir opts) ".")
         opts (assoc opts :dir dir)
+        opts (assoc opts :port port)
         dir (fs/path dir)]
     (assert (fs/directory? dir) (str "The given dir `" dir "` is not a directory."))
+    (binding [*out* *err*]
+      (println (str "Serving assets at http://localhost:" (:port opts))))
     (server/run-server
-     (fn [{:keys [:uri]}]
+     (fn [{:keys [uri]}]
        (let [f (fs/path dir (str/replace-first (URLDecoder/decode uri) #"^/" ""))
              index-file (fs/path f "index.html")]
          (cond
@@ -179,19 +185,15 @@
            {:status 404 :body (str "Not found `" f "` in " dir)})))
      opts)))
 
-(defn ^:no-doc -main [& args]
-  (let [parsed-args (parse-opts args cli-options)
-        opts (:options parsed-args)]
-    (cond
-      (:help opts)
-      (do (println "Start a http server for static files in the given dir. Usage:\n" (:summary parsed-args))
-          (System/exit 0))
+(def cli-opts {:coerce {:port :long}})
 
-      (:errors parsed-args)
-      (do (println "Invalid arguments:\n" (str/join "\n" (:errors parsed-args)))
-          (System/exit 1))
-      :else
-      :continue)
-    (serve opts)
-    (println "Starting http server at" (:port opts) "for" (:dir opts))
-    @(promise)))
+(defn exec
+  "Exec function, intended for command line usage. Same API as `serve` but
+  blocks until process receives SIGINT."
+  {:org.babashka/cli cli-opts}
+  [opts]
+  (serve opts)
+  @(promise))
+
+(defn ^:no-doc -main [& args]
+  (exec (cli/parse-opts args cli-opts)))
