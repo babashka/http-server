@@ -87,6 +87,15 @@ Serving assets at http://localhost:1338
 {:port 1338}
 ```
 
+## Credits
+
+Thanks to [Jakub Holy](https://github.com/holyjak) who made this
+[gist](https://gist.github.com/holyjak/36c6284c047ffb7573e8a34399de27d8) which
+was in turn based on
+[this](https://github.com/babashka/babashka/blob/master/examples/image-viewer.clj)
+babashka example. I used several variations of this in my own projects, which
+eventually became this repo.
+
 ## License
 
 Copyright © 2022 Michiel Borkent
