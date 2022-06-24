@@ -19,9 +19,7 @@ In a script, e.g. `/usr/local/bin/http-server`:
 
 (require '[babashka.deps :as deps])
 (deps/add-deps
- '{:deps {org.babashka/http-server
-          {:git/url "https://github.com/babashka/http-server"
-           :git/sha "8ec8176ab95985f998e10f11c569073685e2aa92"}}})
+ '{:deps {org.babashka/http-server {:mvn/version "0.1.1"}}})
 
 (require '[babashka.http-server :as http-server])
 
@@ -37,9 +35,7 @@ $ http-server --port 8888 --dir resources/public
 In `bb.edn` [tasks](https://book.babashka.org/#tasks):
 
 ``` clojure
-{:deps {org.babashka/http-server
-        {:git/url "https://github.com/babashka/http-server"
-         :git/sha "8ec8176ab95985f998e10f11c569073685e2aa92"}
+{:deps {org.babashka/http-server {:mvn/version "0.1.1"}
         org.babashka/cli {:mvn/version "0.2.23"}}
  :tasks
  {:requires ([babashka.cli :as cli])
