@@ -1,1 +1,4 @@
-{:deps {org.babashka/cli {:mvn/version "0.2.23"}}}
+{:deps {org.babashka/cli {:mvn/version "0.2.23"}} :aliases {
+ :build ;; added by neil
+ {:deps {io.github.clojure/tools.build {:git/tag "v0.8.2" :git/sha "ba1a2bf"}}
+  :ns-default build}}}
