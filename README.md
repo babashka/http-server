@@ -4,7 +4,7 @@
 
 Serve static assets.
 
-Works in babashka and clojure JVM.
+Works in [clojure JVM](#clojure) and [babashka](#babashka).
 
 This README assumes you will update `:git/sha` to the latest sha of this repo.
 
