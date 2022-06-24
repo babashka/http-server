@@ -1,5 +1,11 @@
-{:deps {org.babashka/cli {:mvn/version "0.2.23"}} :aliases {
- :build ;; added by neil
- {:deps {io.github.clojure/tools.build {:git/tag "v0.8.2" :git/sha "ba1a2bf"}
-         slipset/deps-deploy {:mvn/version "0.2.0"}}
-  :ns-default build}}}
+{:deps {org.babashka/cli {:mvn/version "0.2.23"}
+        http-kit/http-kit {:mvn/version "2.6.0"}
+        babashka/fs {:mvn/version "0.1.6"}
+        hiccup/hiccup {:mvn/version "1.0.5"}}
+ :tools/usage {:ns-default babashka.http-server}
+ :aliases
+ {:build ;; added by neil
+  {:deps {io.github.clojure/tools.build {:git/tag "v0.8.2" :git/sha "ba1a2bf"}
+          slipset/deps-deploy {:mvn/version "0.2.0"}}
+   :extra-paths ["." ".build"]
+   :ns-default build}}}

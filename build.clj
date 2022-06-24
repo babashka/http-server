@@ -1,8 +1,10 @@
 (ns build
-  (:require [clojure.tools.build.api :as b]))
+  (:require
+   [clojure.tools.build.api :as b]
+   [utils]))
 
 (def lib 'org.babashka/http-server)
-(def version (format "0.1.0"))
+(def version (utils/format-version))
 (def class-dir "target/classes")
 (def basis (b/create-basis {:project "deps.edn"}))
 (def uber-file (format "target/%s-%s-standalone.jar" (name lib) version))
