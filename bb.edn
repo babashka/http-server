@@ -2,7 +2,9 @@
  :deps {io.github.borkdude/quickdoc
         #_{:local/root "/Users/borkdude/dev/quickdoc"}
         {:git/sha "d5313344c97b79f014a90634313b5fd2205938af"}
-        current/deps {:local/root "."}}
+        current/deps {:local/root "."}
+        io.github.borkdude/gh-release-artifact
+        {:git/sha "cf082df46a648178d1904e9cbcb787d8136a35c6"}}
  :paths [".build"]
  :tasks
  {:requires ([clojure.edn :as edn]
@@ -19,6 +21,35 @@
                         (api/quickdoc {:toc true
                                        :git/branch "main"
                                        :github/repo "https://github.com/babashka/http-server"})])}
+
+  package-jar {:doc "Prepare jar for packages"
+               :task (do
+                       (println "Producing uberjar")
+                       (shell "bb --config .build/uberjar.edn --deps-root .
+                              uberjar http-server.jar -m babashka.http-server"))}
+
+  upload-jar {:doc "Upload jar to release"
+              :depends [package-jar]
+              :requires ([borkdude.gh-release-artifact :as ghr])
+              :task (do
+                      (println "Uploading jar" (str "v" (utils/format-version)))
+                      (ghr/overwrite-asset {:org "babashka"
+                                            :repo "http-server"
+                                            :file "http-server.jar"
+                                            :draft true
+                                            :tag (str "v" (utils/format-version))}))}
+
+  complete-release {:doc "Mark release as completed"
+                    :requires ([borkdude.gh-release-artifact :as ghr])
+                    :task (ghr/create-release {:org "babashka"
+                                               :repo "http-server"
+                                               :draft false
+                                               :tag (str "v" (utils/format-version))})}
+
+  tag {:doc "Create and push tag"
+       :task (do (shell "git tag" (str "v" (utils/format-version)))
+                 (shell "git push --tags"))}
+
   bump-release {:doc "Bump release counter"
                 :task (let [old-version (utils/format-version)]
                         (utils/bump-version)
@@ -26,16 +57,16 @@
                                                        old-version
                                                        (utils/format-version)))
                         (shell "git add version.edn README.md")
-                        (shell "git commit -m" (str "v" (utils/format-version)))
-                        (shell "git tag" (str "v" (utils/format-version)))
-                        (shell "git push --tags"))}
+                        (shell "git commit -m" (str "v" (utils/format-version))))}
 
   publish {:doc "Bump release count and publish to clojars"
            :task (do
                    (when-not (:skip-bump cmd-line-opts)
                      (run 'bump-release))
-                   (clojure "-T:build deploy"))}
+                   (println "Uploading jar")
+                   (run 'upload-jar)
+                   (run 'tag)
+                   (clojure "-T:build deploy")
+                   (run 'complete-release))}
 
-  package:jar {:doc "Prepare jar for packages"
-               :task (shell "bb --config .build/uberjar.edn --deps-root .
-                             uberjar http-server.jar -m babashka.http-server")}}}
+  }}
