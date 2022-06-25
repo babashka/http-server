@@ -41,7 +41,7 @@
 
   tag {:doc "Create and push tag"
        :task (do (shell "git tag" (str "v" (utils/format-version)))
-                 (shell "git push --tags"))}
+                 (shell "git push --atomic" "origin" "main" (str "v" (utils/format-version))))}
 
   bump-release {:doc "Bump release counter"
                 :task (let [old-version (utils/format-version)]
@@ -59,6 +59,7 @@
                    (println "Uploading jar")
                    (run 'tag)
                    (run 'upload-jar)
-                   (clojure "-T:build deploy"))}
+                   (clojure "-T:build deploy")
+                   )}
 
   }}
