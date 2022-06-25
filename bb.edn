@@ -36,15 +36,8 @@
                       (ghr/overwrite-asset {:org "babashka"
                                             :repo "http-server"
                                             :file "http-server.jar"
-                                            :draft true
+                                            :draft false
                                             :tag (str "v" (utils/format-version))}))}
-
-  complete-release {:doc "Mark release as completed"
-                    :requires ([borkdude.gh-release-artifact :as ghr])
-                    :task (ghr/create-release {:org "babashka"
-                                               :repo "http-server"
-                                               :draft false
-                                               :tag (str "v" (utils/format-version))})}
 
   tag {:doc "Create and push tag"
        :task (do (shell "git tag" (str "v" (utils/format-version)))
@@ -64,9 +57,8 @@
                    (when-not (:skip-bump cmd-line-opts)
                      (run 'bump-release))
                    (println "Uploading jar")
-                   (run 'upload-jar)
                    (run 'tag)
-                   (clojure "-T:build deploy")
-                   (run 'complete-release))}
+                   (run 'upload-jar)
+                   (clojure "-T:build deploy"))}
 
   }}
