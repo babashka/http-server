@@ -152,7 +152,7 @@
   {:headers {"Content-Type" (ext-mime-type (fs/file-name path))}
    :body (fs/file path)})
 
-(defn router-on [dir]
+(defn file-router [dir]
   (fn [{:keys [uri]}]
     (let [f (fs/path dir (str/replace-first (URLDecoder/decode uri) #"^/" ""))
           index-file (fs/path f "index.html")]
@@ -184,7 +184,7 @@ Options:
     (assert (fs/directory? dir) (str "The given dir `" dir "` is not a directory."))
     (binding [*out* *err*]
       (println (str "Serving assets at http://localhost:" (:port opts))))
-    (server/run-server (router-on dir) opts)))
+    (server/run-server (file-router dir) opts)))
 
 (def ^:private cli-opts {:coerce {:port :long}})
 
