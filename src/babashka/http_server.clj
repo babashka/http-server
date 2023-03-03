@@ -152,6 +152,23 @@
   {:headers {"Content-Type" (ext-mime-type (fs/file-name path))}
    :body (fs/file path)})
 
+(defn file-router [dir]
+  (fn [{:keys [uri]}]
+    (let [f (fs/path dir (str/replace-first (URLDecoder/decode uri) #"^/" ""))
+          index-file (fs/path f "index.html")]
+      (cond
+        (and (fs/directory? f) (fs/readable? index-file))
+        (body index-file)
+
+        (fs/directory? f)
+        (index dir f)
+
+        (fs/readable? f)
+        (body f)
+
+        :else
+        {:status 404 :body (str "Not found `" f "` in " dir)}))))
+
 (defn serve
   "Serves static assets using web server.
 Options:
@@ -167,23 +184,7 @@ Options:
     (assert (fs/directory? dir) (str "The given dir `" dir "` is not a directory."))
     (binding [*out* *err*]
       (println (str "Serving assets at http://localhost:" (:port opts))))
-    (server/run-server
-     (fn [{:keys [uri]}]
-       (let [f (fs/path dir (str/replace-first (URLDecoder/decode uri) #"^/" ""))
-             index-file (fs/path f "index.html")]
-         (cond
-           (and (fs/directory? f) (fs/readable? index-file))
-           (body index-file)
-
-           (fs/directory? f)
-           (index dir f)
-
-           (fs/readable? f)
-           (body f)
-
-           :else
-           {:status 404 :body (str "Not found `" f "` in " dir)})))
-     opts)))
+    (server/run-server (file-router dir) opts)))
 
 (def ^:private cli-opts {:coerce {:port :long}})
 
