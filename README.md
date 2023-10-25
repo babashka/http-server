@@ -21,13 +21,13 @@ To your `deps.edn` add an alias:
 Then run from the command line:
 
 ``` clojure
-clj -M:serve :port 1339 :dir "."
+clj -M:serve :port 1339 :dir "." :headers "Cross-Origin-Opener-Policy:same-origin"
 ```
 
 or:
 
 ``` clojure
-clj -X:serve :port 1339 :dir '"."'
+clj -X:serve :port 1339 :dir '"."' :headers "Cross-Origin-Opener-Policy:same-origin"
 ```
 
 Or install as a tool:
@@ -56,7 +56,7 @@ In a script, e.g. `/usr/local/bin/http-server`:
 Then invoke using:
 
 ``` clojure
-$ http-server --port 8888 --dir resources/public
+$ http-server --port 8888 --dir resources/public --headers "Cross-Origin-Opener-Policy:same-origin"
 ```
 
 In `bb.edn` [tasks](https://book.babashka.org/#tasks):
@@ -66,7 +66,7 @@ In `bb.edn` [tasks](https://book.babashka.org/#tasks):
         org.babashka/cli {:mvn/version "0.2.23"}}
  :tasks
  {:requires ([babashka.cli :as cli])
-  :init (def cli-opts (cli/parse-opts *command-line-args* {:coerce {:port :int}}))
+  :init (def cli-opts (cli/parse-opts *command-line-args* {:coerce {:port :int :headers [:string]}}))
 
   serve {:doc "Serve static assets"
          :requires ([babashka.http-server :as server])

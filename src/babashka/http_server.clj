@@ -197,7 +197,7 @@ Options:
       (println (str "Serving assets at http://localhost:" (:port opts))))
     (server/run-server (file-router dir headers) opts)))
 
-(def ^:private cli-opts {:coerce {:port :long :headers [:string :string]}})
+(def ^:private cli-opts {:coerce {:port :long :headers [:string]}})
 
 (defn exec
   "Exec function, intended for command line usage. Same API as `serve` but
