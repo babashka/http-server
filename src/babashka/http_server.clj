@@ -173,12 +173,6 @@
         :else
         {:status 404 :body (str "Not found `" f "` in " dir)}))))
 
-(defn- opts->headers [opts]
-  (when-let [headers (:headers opts)]
-    (->> headers
-         (map #(str/split % #"\:"))
-         (reduce (fn [a [k v]] (into a {k (str/trim v)})) {}))))
-
 (defn serve
   "Serves static assets using web server.
 Options:
@@ -189,15 +183,14 @@ Options:
     :or {port 8090}
     :as opts}]
   (let [dir (or (:dir opts) ".")
-        headers (opts->headers opts)
         opts (assoc opts :dir dir :port port)
         dir (fs/path dir)]
     (assert (fs/directory? dir) (str "The given dir `" dir "` is not a directory."))
     (binding [*out* *err*]
       (println (str "Serving assets at http://localhost:" (:port opts))))
-    (server/run-server (file-router dir headers) opts)))
+    (server/run-server (file-router dir (opts :headers)) opts)))
 
-(def ^:private cli-opts {:coerce {:port :long :headers [:string]}})
+(def ^:private cli-opts {:coerce {:port :long :headers :edn}})
 
 (defn exec
   "Exec function, intended for command line usage. Same API as `serve` but
