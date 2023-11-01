@@ -178,7 +178,7 @@
 Options:
   * `:dir` - directory from which to serve assets
   * `:port` - port
-  * `:headers` - an list of strings with 'name:value'"
+  * `:headers` - map of headers {key value}"
   [{:keys [port]
     :or {port 8090}
     :as opts}]
