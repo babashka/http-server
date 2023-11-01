@@ -11,11 +11,11 @@
   (:import [java.net URLDecoder URLEncoder]))
 
 #_(def ^:private
-  cli-options [["-p" "--port PORT" "Port for HTTP server"
-                :default 8090 :parse-fn #(Integer/parseInt %)]
-               ["-d" "--dir DIR" "Directory to serve files from"
-                :default "."]
-               ["-h" "--help" "Print usage info"]])
+    cli-options [["-p" "--port PORT" "Port for HTTP server"
+                  :default 8090 :parse-fn #(Integer/parseInt %)]
+                 ["-d" "--dir DIR" "Directory to serve files from"
+                  :default "."]
+                 ["-h" "--help" "Print usage info"]])
 
 ;; A simple mime type utility from https://github.com/ring-clojure/ring/blob/master/ring-core/src/ring/util/mime_type.clj
 (def ^{:doc "A map of file extensions to mime-types."}
@@ -149,23 +149,26 @@
                html/html
                str)}))
 
-(defn- body [path]
-  {:headers {"Content-Type" (ext-mime-type (fs/file-name path))}
-   :body (fs/file path)})
+(defn- body
+  ([path]
+   (body path {}))
+  ([path headers]
+   {:headers (merge {"Content-Type" (ext-mime-type (fs/file-name path))} headers)
+    :body (fs/file path)}))
 
-(defn file-router [dir]
+(defn file-router [dir headers]
   (fn [{:keys [uri]}]
     (let [f (fs/path dir (str/replace-first (URLDecoder/decode uri) #"^/" ""))
           index-file (fs/path f "index.html")]
       (cond
         (and (fs/directory? f) (fs/readable? index-file))
-        (body index-file)
+        (body index-file headers)
 
         (fs/directory? f)
         (index dir f)
 
         (fs/readable? f)
-        (body f)
+        (body f headers)
 
         :else
         {:status 404 :body (str "Not found `" f "` in " dir)}))))
@@ -174,20 +177,20 @@
   "Serves static assets using web server.
 Options:
   * `:dir` - directory from which to serve assets
-  * `:port` - port"
+  * `:port` - port
+  * `:headers` - map of headers {key value}"
   [{:keys [port]
     :or {port 8090}
     :as opts}]
   (let [dir (or (:dir opts) ".")
-        opts (assoc opts :dir dir)
-        opts (assoc opts :port port)
+        opts (assoc opts :dir dir :port port)
         dir (fs/path dir)]
     (assert (fs/directory? dir) (str "The given dir `" dir "` is not a directory."))
     (binding [*out* *err*]
       (println (str "Serving assets at http://localhost:" (:port opts))))
-    (server/run-server (file-router dir) opts)))
+    (server/run-server (file-router dir (opts :headers)) opts)))
 
-(def ^:private cli-opts {:coerce {:port :long}})
+(def ^:private cli-opts {:coerce {:port :long :headers :edn}})
 
 (defn exec
   "Exec function, intended for command line usage. Same API as `serve` but
