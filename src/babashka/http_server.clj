@@ -156,6 +156,9 @@
    {:headers (merge {"Content-Type" (ext-mime-type (fs/file-name path))} headers)
     :body (fs/file path)}))
 
+(defn- with-ext [path ext]
+  (fs/path (fs/parent path) (str (fs/file-name path) ext)))
+
 (defn file-router [dir headers]
   (fn [{:keys [uri]}]
     (let [f (fs/path dir (str/replace-first (URLDecoder/decode uri) #"^/" ""))
@@ -169,6 +172,9 @@
 
         (fs/readable? f)
         (body f headers)
+
+        (and (nil? (fs/extension f)) (fs/readable? (with-ext f ".html")))
+        (body (with-ext f ".html") headers)
 
         :else
         {:status 404 :body (str "Not found `" f "` in " dir)}))))
