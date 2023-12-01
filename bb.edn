@@ -4,7 +4,7 @@
         {:git/sha "d5313344c97b79f014a90634313b5fd2205938af"}
         current/deps {:local/root "."}
         io.github.borkdude/gh-release-artifact
-        {:git/sha "cf082df46a648178d1904e9cbcb787d8136a35c6"}}
+        {:git/sha "4a9a74f0e50e897c45df8cc70684360eb30fce80"}}
  :paths [".build"]
  :tasks
  {:requires ([clojure.edn :as edn]
@@ -37,6 +37,7 @@
                                             :repo "http-server"
                                             :file "http-server.jar"
                                             :draft false
+                                            :overwrite true
                                             :tag (str "v" (utils/format-version))}))}
 
   tag {:doc "Create and push tag"
