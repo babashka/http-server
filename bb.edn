@@ -54,10 +54,7 @@
 
   publish {:doc "Bump release count and publish to clojars"
            :task (do
-                   (when-not (:skip-bump cmd-line-opts)
-                     (run 'bump-release))
                    (println "Uploading jar")
-                   (run 'tag)
                    (run 'upload-jar)
                    (clojure "-T:build deploy")
                    )}
