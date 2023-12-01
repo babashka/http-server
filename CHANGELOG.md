@@ -1,5 +1,7 @@
 # Changelog
 
+[Http-server](https://github.com/babashka/http-server): Serve static assets with [babashka](https://babashka.org/)
+
 ## 0.1.12
 
 - Add default `:headers` option ([@rafaeldelboni](https://github.com/rafaeldelboni))
