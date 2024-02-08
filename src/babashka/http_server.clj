@@ -131,7 +131,7 @@
    (let [mime-types (merge default-mime-types mime-types)]
      (mime-types (filename-ext filename)))))
 
-(defn- index [dir f]
+(defn- index [dir f headers]
   (let [files (map #(str (.relativize dir %))
                    (fs/list-dir f))]
     {:body (-> [:html
@@ -147,7 +147,8 @@
                  [:hr]
                  [:footer {:style {"text-aling" "center"}} "Served by http-server.clj"]]]
                html/html
-               str)}))
+               str)
+     :headers headers}))
 
 (defn- body
   ([path]
@@ -168,7 +169,7 @@
         (body index-file headers)
 
         (fs/directory? f)
-        (index dir f)
+        (index dir f headers)
 
         (fs/readable? f)
         (body f headers)
