@@ -131,7 +131,7 @@
    (let [mime-types (merge default-mime-types mime-types)]
      (mime-types (filename-ext filename)))))
 
-(defn- index [dir f headers]
+(defn- index [dir f]
   (let [files (map #(str (.relativize dir %))
                    (fs/list-dir f))]
     {:body (-> [:html
@@ -147,8 +147,7 @@
                  [:hr]
                  [:footer {:style {"text-aling" "center"}} "Served by http-server.clj"]]]
                html/html
-               str)
-     :headers headers}))
+               str)}))
 
 (defn- body
   ([path]
@@ -164,21 +163,23 @@
   (fn [{:keys [uri]}]
     (let [f (fs/path dir (str/replace-first (URLDecoder/decode uri) #"^/" ""))
           index-file (fs/path f "index.html")]
-      (cond
-        (and (fs/directory? f) (fs/readable? index-file))
-        (body index-file headers)
+      (update (cond
+                (and (fs/directory? f) (fs/readable? index-file))
+                (body index-file)
 
-        (fs/directory? f)
-        (index dir f headers)
+                (fs/directory? f)
+                (index dir f)
 
-        (fs/readable? f)
-        (body f headers)
+                (fs/readable? f)
+                (body f)
 
-        (and (nil? (fs/extension f)) (fs/readable? (with-ext f ".html")))
-        (body (with-ext f ".html") headers)
+                (and (nil? (fs/extension f)) (fs/readable? (with-ext f ".html")))
+                (body (with-ext f ".html") headers)
 
-        :else
-        {:status 404 :body (str "Not found `" f "` in " dir)}))))
+                :else
+                {:status 404 :body (str "Not found `" f "` in " dir)})
+              :headers (fn [response-headers]
+                         (merge headers response-headers))))))
 
 (defn serve
   "Serves static assets using web server.
