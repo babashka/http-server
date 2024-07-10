@@ -131,8 +131,18 @@
    (let [mime-types (merge default-mime-types mime-types)]
      (mime-types (filename-ext filename)))))
 
+(defn- file-link
+  "Get HTML link for a file/directory in the given dir."
+  [dir f]
+  (let [rel-path (fs/relativize dir f)
+        ending (if (fs/directory? f) "/" "")
+        names (seq rel-path)
+        enc-names (map #(URLEncoder/encode (str %)) names)]
+    [:a {:href (str "/" (str/join "/" enc-names) ending)}
+     (str rel-path ending)]))
+
 (defn- index [dir f]
-  (let [files (map #(str (.relativize dir %))
+  (let [files (map #(file-link dir %)
                    (fs/list-dir f))]
     {:body (-> [:html
                 [:head
@@ -142,8 +152,7 @@
                  [:h1 "Index of " [:code (str f)]]
                  [:ul
                   (for [child files]
-                    [:li [:a {:href (URLEncoder/encode (str child))} child
-                          (when (fs/directory? (fs/path dir child)) "/")]])]
+                    [:li child])]
                  [:hr]
                  [:footer {:style {"text-aling" "center"}} "Served by http-server.clj"]]]
                html/html
