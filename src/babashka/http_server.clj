@@ -154,7 +154,7 @@
                   (for [child files]
                     [:li child])]
                  [:hr]
-                 [:footer {:style {"text-aling" "center"}} "Served by http-server.clj"]]]
+                 [:footer {:style {"text-align" "center"}} "Served by http-server.clj"]]]
                html/html
                str)}))
 
