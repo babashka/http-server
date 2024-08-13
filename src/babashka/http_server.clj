@@ -165,6 +165,41 @@
    {:headers (merge {"Content-Type" (ext-mime-type (fs/file-name path))} headers)
     :body (fs/file path)}))
 
+(defn- parse-range-header [range-header]
+  (map #(when % (Long/parseLong %))
+       (-> range-header
+           (str/replace #"^bytes=" "")
+           (str/split #"-"))))
+
+(defn- read-bytes [f [start end]]
+  (let [end (or end (dec (min (fs/size f)
+                              (+ start (* 1024 1024)))))
+        arr (byte-array (- end start))]
+    (with-open [is (java.io.FileInputStream. f)]
+      (-> is .getChannel (.position start))
+      (.read is arr))
+    arr))
+
+(defn- byte-range
+  ([path request-headers]
+   (byte-range path request-headers {}))
+  ([path request-headers response-headers]
+   (let [f (fs/file path)
+         [start end
+          :as requested-range] (parse-range-header (request-headers "range"))
+         arr (read-bytes f requested-range)
+         num-bytes-read (count arr)]
+     {:status 206
+      :headers (merge {"Content-Type" (ext-mime-type (fs/file-name path))
+                       "Accept-Ranges" "bytes"
+                       "Content-Length" num-bytes-read
+                       "Content-Range" (format "bytes %d-%d/%d"
+                                               start
+                                               (+ start num-bytes-read)
+                                               (fs/size f))}
+                      response-headers)
+      :body arr})))
+
 (defn- with-ext [path ext]
   (fs/path (fs/parent path) (str (fs/file-name path) ext)))
 
@@ -178,6 +213,9 @@
 
                 (fs/directory? f)
                 (index dir f)
+
+                (and (fs/readable? f) (contains? (:headers req) "range"))
+                (byte-range f (:headers req))
 
                 (fs/readable? f)
                 (body f)
