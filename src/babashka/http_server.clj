@@ -10,6 +10,8 @@
             [org.httpkit.server :as server])
   (:import [java.net URLDecoder URLEncoder]))
 
+(set! *warn-on-reflection* true)
+
 #_(def ^:private
     cli-options [["-p" "--port PORT" "Port for HTTP server"
                   :default 8090 :parse-fn #(Integer/parseInt %)]
@@ -174,10 +176,11 @@
 (defn- read-bytes [f [start end]]
   (let [end (or end (dec (min (fs/size f)
                               (+ start (* 1024 1024)))))
-        arr (byte-array (- end start))]
-    (with-open [is (java.io.FileInputStream. f)]
-      (-> is .getChannel (.position start))
-      (.read is arr))
+        len (- end start)
+        arr (byte-array len)]
+    (with-open [r (java.io.RandomAccessFile. f "r")]
+      (.seek r start)
+      (.read r arr 0 len))
     arr))
 
 (defn- byte-range
@@ -204,7 +207,7 @@
   (fs/path (fs/parent path) (str (fs/file-name path) ext)))
 
 (defn file-router [dir headers]
-  (fn [{:keys [uri]}]
+  (fn [{:keys [uri] :as req}]
     (let [f (fs/path dir (str/replace-first (URLDecoder/decode uri) #"^/" ""))
           index-file (fs/path f "index.html")]
       (update (cond
