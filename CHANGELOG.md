@@ -2,6 +2,10 @@
 
 [Http-server](https://github.com/babashka/http-server): Serve static assets with [babashka](https://babashka.org/)
 
+## Unreleased
+
+- [#16](https://github.com/babashka/http-server/issues/16): support range requests
+
 ## 0.1.13
 
 - [#13](https://github.com/babashka/http-server/issues/13): add an ending slash to the dir link, and don't encode the slashes ([@KDr2](https://github.com/KDr2))

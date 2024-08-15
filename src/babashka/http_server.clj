@@ -10,6 +10,8 @@
             [org.httpkit.server :as server])
   (:import [java.net URLDecoder URLEncoder]))
 
+(set! *warn-on-reflection* true)
+
 #_(def ^:private
     cli-options [["-p" "--port PORT" "Port for HTTP server"
                   :default 8090 :parse-fn #(Integer/parseInt %)]
@@ -165,11 +167,47 @@
    {:headers (merge {"Content-Type" (ext-mime-type (fs/file-name path))} headers)
     :body (fs/file path)}))
 
+(defn- parse-range-header [range-header]
+  (map #(when % (Long/parseLong %))
+       (-> range-header
+           (str/replace #"^bytes=" "")
+           (str/split #"-"))))
+
+(defn- read-bytes [f [start end]]
+  (let [end (or end (dec (min (fs/size f)
+                              (+ start (* 1024 1024)))))
+        len (- end start)
+        arr (byte-array len)]
+    (with-open [r (java.io.RandomAccessFile. f "r")]
+      (.seek r start)
+      (.read r arr 0 len))
+    arr))
+
+(defn- byte-range
+  ([path request-headers]
+   (byte-range path request-headers {}))
+  ([path request-headers response-headers]
+   (let [f (fs/file path)
+         [start end
+          :as requested-range] (parse-range-header (request-headers "range"))
+         arr (read-bytes f requested-range)
+         num-bytes-read (count arr)]
+     {:status 206
+      :headers (merge {"Content-Type" (ext-mime-type (fs/file-name path))
+                       "Accept-Ranges" "bytes"
+                       "Content-Length" num-bytes-read
+                       "Content-Range" (format "bytes %d-%d/%d"
+                                               start
+                                               (+ start num-bytes-read)
+                                               (fs/size f))}
+                      response-headers)
+      :body arr})))
+
 (defn- with-ext [path ext]
   (fs/path (fs/parent path) (str (fs/file-name path) ext)))
 
 (defn file-router [dir headers]
-  (fn [{:keys [uri]}]
+  (fn [{:keys [uri] :as req}]
     (let [f (fs/path dir (str/replace-first (URLDecoder/decode uri) #"^/" ""))
           index-file (fs/path f "index.html")]
       (update (cond
@@ -178,6 +216,9 @@
 
                 (fs/directory? f)
                 (index dir f)
+
+                (and (fs/readable? f) (contains? (:headers req) "range"))
+                (byte-range f (:headers req))
 
                 (fs/readable? f)
                 (body f)
