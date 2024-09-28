@@ -18,7 +18,16 @@
                 :lib lib
                 :version version
                 :basis basis
-                :src-dirs ["src"]})
+                :src-dirs ["src"]
+                :scm {:url "http://github.com/babashka/http-server"
+                      :connection "scm:git:git://github.com/babashka/http-server.git"
+                      :developerConnection "scm:git:ssh://git@github.com/babashka/http-server.git"
+                      :tag (str "v" version)}
+                :pom-data
+                [[:licenses
+                  [:license
+                   [:name "MIT License"]
+                   [:url "https://opensource.org/license/mit/"]]]]})
   (b/copy-dir {:src-dirs ["src" "resources"]
                :target-dir class-dir})
   (b/jar {:class-dir class-dir
