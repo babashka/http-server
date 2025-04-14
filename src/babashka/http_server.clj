@@ -27,6 +27,8 @@
    "ai"       "application/postscript"
    "appcache" "text/cache-manifest"
    "asc"      "text/plain"
+   "asp"      "text/html"
+   "aspx"     "text/html"
    "atom"     "application/atom+xml"
    "avi"      "video/x-msvideo"
    "bin"      "application/octet-stream"
