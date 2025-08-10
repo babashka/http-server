@@ -4,7 +4,7 @@
 
 ## 0.1.13
 
-- [#16](https://github.com/babashka/http-server/issues/16): support range requests
+- [#16](https://github.com/babashka/http-server/issues/16): support range requests ([jmglov](https://github.com/jmglov))
 - [#13](https://github.com/babashka/http-server/issues/13): add an ending slash to the dir link, and don't encode the slashes ([@KDr2](https://github.com/KDr2))
 - [#12](https://github.com/babashka/http-server/issues/12): Add headers to index page (rather than just file responses)
 
