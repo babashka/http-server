@@ -175,7 +175,7 @@
            (str/replace #"^bytes=" "")
            (str/split #"-"))))
 
-(defn- read-bytes [f [start end]]
+(defn- read-bytes [^java.io.File f [start end]]
   (let [end (or end (dec (min (fs/size f)
                               (+ start (* 1024 1024)))))
         len (- end start)
@@ -190,7 +190,7 @@
    (byte-range path request-headers {}))
   ([path request-headers response-headers]
    (let [f (fs/file path)
-         [start end
+         [start _end
           :as requested-range] (parse-range-header (request-headers "range"))
          arr (read-bytes f requested-range)
          num-bytes-read (count arr)]
