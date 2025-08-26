@@ -2,6 +2,10 @@
 
 [Http-server](https://github.com/babashka/http-server): Serve static assets with [babashka](https://babashka.org/)
 
+## 0.1.14
+
+- [#21](https://github.com/babashka/http-server/issues/21): Add `:not-found` option for handling unfound files. The option is a function of the request and should return a map with `:status` and `:body`.
+
 ## 0.1.13
 
 - [#16](https://github.com/babashka/http-server/issues/16): support range requests ([jmglov](https://github.com/jmglov))

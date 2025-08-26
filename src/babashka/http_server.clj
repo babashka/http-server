@@ -208,7 +208,7 @@
 (defn- with-ext [path ext]
   (fs/path (fs/parent path) (str (fs/file-name path) ext)))
 
-(defn file-router [dir headers]
+(defn- file-router [dir {:keys [not-found headers]}]
   (fn [{:keys [uri] :as req}]
     (let [f (fs/path dir (str/replace-first (URLDecoder/decode uri) #"^/" ""))
           index-file (fs/path f "index.html")]
@@ -228,6 +228,9 @@
                 (and (nil? (fs/extension f)) (fs/readable? (with-ext f ".html")))
                 (body (with-ext f ".html") headers)
 
+                ;; file isn't found
+                not-found
+                (not-found req)
                 :else
                 {:status 404 :body (str "Not found `" f "` in " dir)})
               :headers (fn [response-headers]
@@ -238,7 +241,8 @@
 Options:
   * `:dir` - directory from which to serve assets
   * `:port` - port
-  * `:headers` - map of headers {key value}"
+  * `:headers` - map of headers {key value}
+  * `:not-found` - response function of request map when file isn't found"
   [{:keys [port]
     :or {port 8090}
     :as opts}]
@@ -248,7 +252,7 @@ Options:
     (assert (fs/directory? dir) (str "The given dir `" dir "` is not a directory."))
     (binding [*out* *err*]
       (println (str "Serving assets at http://localhost:" (:port opts))))
-    (server/run-server (file-router dir (opts :headers)) opts)))
+    (server/run-server (file-router dir opts) opts)))
 
 (def ^:private cli-opts {:coerce {:port :long :headers :edn}})
 
