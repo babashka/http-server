@@ -13,7 +13,7 @@ Works in [clojure JVM](#clojure) and [babashka](#babashka).
 To your `deps.edn` add an alias:
 
 ``` clojure
-:serve {:deps {org.babashka/http-server {:mvn/version "0.1.13"}}
+:serve {:deps {org.babashka/http-server {:mvn/version "0.1.14"}}
         :main-opts ["-m" "babashka.http-server"]
         :exec-fn babashka.http-server/exec}
 ```
@@ -33,7 +33,7 @@ clj -X:serve :port 1339 :dir '"."' :headers '{"Cross-Origin-Opener-Policy" "same
 Or install as a tool:
 
 ``` clojure
-$ clj -Ttools install io.github.babashka/http-server '{:git/tag "v0.1.13"}' :as serve
+$ clj -Ttools install io.github.babashka/http-server '{:git/tag "v0.1.14"}' :as serve
 $ clj -Tserve exec
 ```
 
@@ -46,7 +46,7 @@ In a script, e.g. `/usr/local/bin/http-server`:
 
 (require '[babashka.deps :as deps])
 (deps/add-deps
- '{:deps {org.babashka/http-server {:mvn/version "0.1.13"}}})
+ '{:deps {org.babashka/http-server {:mvn/version "0.1.14"}}})
 
 (require '[babashka.http-server :as http-server])
 
@@ -62,7 +62,7 @@ $ http-server --port 8888 --dir resources/public --headers '{"Cross-Origin-Opene
 In `bb.edn` [tasks](https://book.babashka.org/#tasks):
 
 ``` clojure
-{:deps {org.babashka/http-server {:mvn/version "0.1.13"}
+{:deps {org.babashka/http-server {:mvn/version "0.1.14"}
         org.babashka/cli {:mvn/version "0.2.23"}}
  :tasks
  {:requires ([babashka.cli :as cli])
