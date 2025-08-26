@@ -5,6 +5,7 @@
 ## 0.1.14
 
 - [#21](https://github.com/babashka/http-server/issues/21): Add `:not-found` option for handling unfound files. The option is a function of the request and should return a map with `:status` and `:body`.
+-  [#19](https://github.com/babashka/http-server/issues/19): Add text/html MIME types for asp and aspx file extensions ([@respatialized](https://github.com/respatialized))
 
 ## 0.1.13
 
