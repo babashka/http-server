@@ -2,10 +2,14 @@
 
 [Http-server](https://github.com/babashka/http-server): Serve static assets with [babashka](https://babashka.org/)
 
+## 0.1.15
+
+- [#22](https://github.com/babashka/http-server/issues/22): fix off-by-one error in range requests ([@jyn514](https://github.com/jyn514))
+
 ## 0.1.14
 
 - [#21](https://github.com/babashka/http-server/issues/21): Add `:not-found` option for handling unfound files. The option is a function of the request and should return a map with `:status` and `:body`.
--  [#19](https://github.com/babashka/http-server/issues/19): Add text/html MIME types for asp and aspx file extensions ([@respatialized](https://github.com/respatialized))
+- [#19](https://github.com/babashka/http-server/issues/19): Add text/html MIME types for asp and aspx file extensions ([@respatialized](https://github.com/respatialized))
 
 ## 0.1.13
 
