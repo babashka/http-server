@@ -212,7 +212,7 @@
 (defn- file-router [dir {:keys [not-found headers]}]
   (fn [{:keys [uri] :as req}]
     (let [f (fs/path dir (str/replace-first (URLDecoder/decode uri) #"^/" ""))
-          index-file (fs/path f "index.html")]
+          index-file (some #(when (fs/readable? %) %) (fs/glob f "index.{htm,html}"))]
       (update (cond
                 (and (fs/directory? f) (fs/readable? index-file))
                 (body index-file)
