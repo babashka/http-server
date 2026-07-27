@@ -5,6 +5,7 @@
 ## 0.1.15
 
 - [#22](https://github.com/babashka/http-server/issues/22): fix off-by-one error in range requests ([@jyn514](https://github.com/jyn514))
+- Range requests: inclusive `Content-Range` last-pos per RFC 9110; support suffix ranges (`bytes=-N`, previously a 500); clamp last-pos beyond EOF; read the full range (`readFully`); add a test suite (`bb test`) ([@slagyr](https://github.com/slagyr))
 
 ## 0.1.14
 

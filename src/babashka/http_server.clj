@@ -170,20 +170,28 @@
     :body (fs/file path)}))
 
 (defn- parse-range-header [range-header]
-  (map #(when % (Long/parseLong %))
+  (map #(when (seq %) (Long/parseLong %))
        (-> range-header
            (str/replace #"^bytes=" "")
            (str/split #"-"))))
 
+(defn- effective-range
+  "Resolves a parsed Range pair against the file size, returning
+  [start end) with an exclusive end. Per RFC 9110 §14.1.2 both range
+  positions are inclusive, and `bytes=-N` means the final N bytes.
+  Open-ended ranges are capped at 1 MiB per response."
+  [[start end] size]
+  (cond
+    (nil? start) [(max 0 (- size end)) size]
+    (nil? end)   [start (min size (+ start (* 1024 1024)))]
+    :else        [start (min size (inc end))]))
+
 (defn- read-bytes [^java.io.File f [start end]]
-  (let [end (if end (inc end)
-              (min (fs/size f)
-                   (+ start (* 1024 1024))))
-        len (- end start)
+  (let [len (- end start)
         arr (byte-array len)]
     (with-open [r (java.io.RandomAccessFile. f "r")]
       (.seek r start)
-      (.read r arr 0 len))
+      (.readFully r arr 0 len))
     arr))
 
 (defn- byte-range
@@ -191,9 +199,11 @@
    (byte-range path request-headers {}))
   ([path request-headers response-headers]
    (let [f (fs/file path)
-         [start _end
-          :as requested-range] (parse-range-header (request-headers "range"))
-         arr (read-bytes f requested-range)
+         size (fs/size f)
+         [start end] (-> (request-headers "range")
+                         (parse-range-header)
+                         (effective-range size))
+         arr (read-bytes f [start end])
          num-bytes-read (count arr)]
      {:status 206
       :headers (merge {"Content-Type" (ext-mime-type (fs/file-name path))
@@ -201,8 +211,8 @@
                        "Content-Length" num-bytes-read
                        "Content-Range" (format "bytes %d-%d/%d"
                                                start
-                                               (+ start num-bytes-read)
-                                               (fs/size f))}
+                                               (dec end)
+                                               size)}
                       response-headers)
       :body arr})))
 
