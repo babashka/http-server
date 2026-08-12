@@ -70,6 +70,7 @@
    "lzh"      "application/octet-stream"
    "mov"      "video/quicktime"
    "m3u8"     "application/x-mpegurl"
+   "m4a"      "audio/mp4"
    "m4v"      "video/mp4"
    "mjs"      "text/javascript"
    "mp3"      "audio/mpeg"
