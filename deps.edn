@@ -2,11 +2,4 @@
         http-kit/http-kit {:mvn/version "2.6.0"}
         babashka/fs {:mvn/version "0.1.6"}
         hiccup/hiccup {:mvn/version "2.0.0-alpha2"}}
- :tools/usage {:ns-default babashka.http-server}
- :aliases
- {:build ;; added by neil
-  {:deps {io.github.clojure/tools.build {:git/tag "v0.10.5"
-                                         :git/sha "2a21b7a"}
-          slipset/deps-deploy {:mvn/version "0.2.2"}}
-   :extra-paths ["." ".build"]
-   :ns-default build}}}
+ :tools/usage {:ns-default babashka.http-server}}
