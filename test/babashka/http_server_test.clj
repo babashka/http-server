@@ -16,6 +16,8 @@
   (delay
     (let [dir (fs/create-temp-dir)]
       (fs/write-bytes (fs/file (fs/file dir) "f.bin") data)
+      (doseq [ext ["clj" "cljc" "cljs"]]
+        (spit (fs/file (fs/file dir) (str "f." ext)) "(ns f)"))
       (server/serve {:dir (str dir) :port port})
       (Thread/sleep 100))))
 
@@ -85,3 +87,9 @@
       (is (= 206 status))
       (is (nil? (byte-diff (expected-bytes 0 1000) body)))
       (is (= "bytes 0-999/1000" (get headers "content-range"))))))
+
+(deftest clojure-source-content-type-test
+  (testing ".clj, .cljc and .cljs files have Content-Type text/plain"
+    (doseq [ext ["clj" "cljc" "cljs"]]
+      (is (= "text/plain"
+             (get-in (http/get (str base "/f." ext)) [:headers "content-type"]))))))

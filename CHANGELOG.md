@@ -2,6 +2,10 @@
 
 [Http-server](https://github.com/babashka/http-server): Serve static assets with [babashka](https://babashka.org/)
 
+## Unreleased
+
+- Serve `.clj`, `.cljc` and `.cljs` files as `text/plain`
+
 ## 0.1.15
 
 - [#22](https://github.com/babashka/http-server/issues/22): fix off-by-one error in range requests ([@jyn514](https://github.com/jyn514))
